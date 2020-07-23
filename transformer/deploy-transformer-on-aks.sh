@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Copyright 2019 StreamSets Inc.
 #
@@ -37,6 +37,8 @@ SCH_PASSWORD=$4
 KUBE_NAMESPACE=$5
 BDC_KUBE_NAMESPACE="mssql-cluster"
 
+JAVA_HOME=/usr/lib/jvm/default-java
+
 ## Set Context
 # shellcheck disable=SC2046
 kubectl config set-context $(kubectl config current-context) --namespace="${KUBE_NAMESPACE}"
@@ -65,7 +67,8 @@ kubectl create secret generic streamsets-transformer-creds \
     --from-literal=transformer_token_string="${TRANSFORMER_TOKEN}"
 
 ## Generate a UUID for the transformer
-transformer_id=$(docker run --rm andyneff/uuidgen uuidgen -t)
+#transformer_id=$(docker run --rm andyneff/uuidgen uuidgen -t)
+transformer_id=$(uuid)
 echo "${transformer_id}" > transformer.id
 
 echo "Deploying traefik ingress controller for transformer..."
@@ -134,7 +137,7 @@ echo | openssl s_client -connect "$external_ip":443 | sed -ne '/-BEGIN CERTIFICA
 keytool -import -file ingress.crt -trustcacerts -noprompt -alias IngressCA -storepass password -keystore truststore.jks
 
 ## Copy the CA certs from jre/lib/security/cacerts to etc/truststore.jks
-keytool -importkeystore -srckeystore "$JAVA_HOME"/jre/lib/security/cacerts -srcstorepass changeit -destkeystore truststore.jks -deststorepass password
+keytool -importkeystore -srckeystore "$JAVA_HOME"/lib/security/cacerts -srcstorepass changeit -destkeystore truststore.jks -deststorepass password
 
 ## Store the truststore.jks in a secret
 kubectl create secret generic streamsets-transformer-cert --namespace="${KUBE_NAMESPACE}" --from-file=truststore.jks

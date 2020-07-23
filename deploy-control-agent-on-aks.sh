@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+set -x # Option to show script debug info in console
 
 # shellcheck disable=SC2112
 function usage() {
@@ -73,7 +74,7 @@ kubectl create serviceaccount streamsets-agent --namespace=${KUBE_NAMESPACE}
 ## create pods (among other things)
 kubectl create role streamsets-agent \
     --verb=get,list,watch,create,update,delete,patch \
-    --resource=pods,secrets,replicasets,deployments.apps,deployments.extensions,ingresses,services,horizontalpodautoscalers \
+    --resource=pods,secrets,replicasets,deployments,ingresses,services,horizontalpodautoscalers \
     --namespace=${KUBE_NAMESPACE}
 
 ## Bind the role to the service account

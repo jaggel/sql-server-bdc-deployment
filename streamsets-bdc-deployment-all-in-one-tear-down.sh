@@ -16,12 +16,12 @@ if [ "$#" -ne 2 ]; then
 fi
 
 SCH_URL=https://cloud.streamsets.com # ControlHub_URL
-SCH_ORG=microsoft-partner
+SCH_ORG=eurobank.gr
 SCH_USER=$1
 SCH_PASSWORD=$2
-KUBE_NAMESPACE=mssql-cluster
-CLUSTER_NAME=mssql-jha-test
-RESOURCE_GROUP=mssql-jha-test
+KUBE_NAMESPACE=streamsets-cluster
+CLUSTER_NAME=ERBBIAKS
+RESOURCE_GROUP=CommonRG
 
 SCH_DEPLOYMENT_NAME="Authoring SDC"
 SCH_DEPLOYMENT_LABELS=auth-sdc

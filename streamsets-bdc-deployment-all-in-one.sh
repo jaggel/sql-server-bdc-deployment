@@ -19,13 +19,14 @@ fi
 # If you agree please change the following line to ACCEPT_EULA=Y
 ACCEPT_EULA=Y
 SCH_URL=https://cloud.streamsets.com # ControlHub_URL
-SCH_ORG=madhu
+SCH_ORG=eurobank.gr
 SCH_USER=$1
 SCH_PASSWORD=$2
-KUBE_NAMESPACE=mssql-cluster
-CLUSTER_NAME=kubcluster-madhu
-RESOURCE_GROUP=madhuResourceGroup
+KUBE_NAMESPACE=streamsets-cluster
+CLUSTER_NAME=ERBBIAKS
+RESOURCE_GROUP=CommonRG
 
+BDC_KUBE_NAMESPACE="mssql-cluster"
 SCH_DEPLOYMENT_NAME="Authoring SDC"
 SCH_DEPLOYMENT_LABELS=auth-sdc
 SDC_REPLICAS=1
@@ -83,13 +84,13 @@ echo "Deploying Authoring datacollector deployment"
 rm -rf ${PWD}/_tmp_deployment.yaml
 cat ./sdc-sql-server-bdc-deployment_init-containers.yaml | envsubst > ${PWD}/_tmp_deployment.yaml
 
-kubectl get svc -n ${KUBE_NAMESPACE} -o json | jq -r '.items[] | select(.status.loadBalancer.ingress[0].ip!=null) | {"serviceName": .metadata.name, "ip":.status.loadBalancer.ingress[0].ip, "port":.spec.ports[0].port}' > ${PWD}/sql-server-ip-and-port.json
+kubectl get svc -n ${BDC_KUBE_NAMESPACE} -o json | jq -r '.items[] | select(.status.loadBalancer.ingress[0].ip!=null) | {"serviceName": .metadata.name, "ip":.status.loadBalancer.ingress[0].ip, "port":.spec.ports[0].port}' > ${PWD}/sql-server-ip-and-port.json
 
 kubectl create secret generic streamsets-sql-server-bdc-resources --namespace=${KUBE_NAMESPACE} --from-file=${PWD}/sql-server-ip-and-port.json
 rm -rf ${PWD}/sql-server-ip-and-port.json
 
 # Create Deployment in SCH
-DEP_ID=$(curl -s -X PUT -d "{\"name\":\"${SCH_DEPLOYMENT_NAME}\",\"description\":\"Authoring sdc\",\"labels\":[\"${SCH_DEPLOYMENT_LABELS}\"],\"numInstances\":${SDC_REPLICAS},\"spec\":\"$(cat ${PWD}/_tmp_deployment.yaml | sed -e :a -e '$!N;s/\n/\\\n/;ta')\",\"agentId\":\"${agent_id}\"}" "${SCH_URL}/provisioning/rest/v1/deployments" --header "Content-Type:application/json" --header "X-Requested-By:SDC" --header "X-SS-REST-CALL:true" --header "X-SS-User-Auth-Token:${SCH_TOKEN}" | jq -r '.id') || { echo 'ERROR: Failed to create deployment in SCH' ; exit 1; }
+DEP_ID=$(curl -s -X PUT -d "{\"name\":\"${SCH_DEPLOYMENT_NAME}\",\"description\":\"Authoring sdc\",\"labels\":[\"${SCH_DEPLOYMENT_LABELS}\"],\"numInstances\":${SDC_REPLICAS},\"spec\":\"$(cat ${PWD}/_tmp_deployment.yaml | sed -e :a -e '$!N;s/\n/\\n/;ta')\",\"agentId\":\"${agent_id}\"}" "${SCH_URL}/provisioning/rest/v1/deployments" --header "Content-Type:application/json" --header "X-Requested-By:SDC" --header "X-SS-REST-CALL:true" --header "X-SS-User-Auth-Token:${SCH_TOKEN}" | jq -r '.id') || { echo 'ERROR: Failed to create deployment in SCH' ; exit 1; }
 echo ${DEP_ID} > dep.id
 
 # Start Deployment in SCH

@@ -43,6 +43,9 @@ kind: Service
 apiVersion: v1
 metadata:
   name: traefik-ingress-service
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    service.beta.kubernetes.io/azure-load-balancer-internal-subnet: "ingressnet"
 spec:
   type: LoadBalancer
   selector:

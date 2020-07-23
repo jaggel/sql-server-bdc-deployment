@@ -13,4 +13,5 @@ defaultEntryPoints = ["http","https"]
       KeyFile = "/ssl/tls.key"
 [kubernetes]
   labelselector = "app=transformer"
+  namespaces = ["streamsets-cluster"]
   ingressClass = "traefik-transformer"
